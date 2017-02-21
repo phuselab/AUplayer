@@ -1,21 +1,10 @@
-function AUplayer(subjectid, sessionid)
+function AUplayer(dataset, subjectid, sessionid)
 
 addpath('AUVs');
 
-if ~isstring(subjectid)
-    subjectid = num2str(subjectid);
-end
 
-if exist('sessionid','var')
-    sessionid = num2str(sessionid);
-end
+[dataFile, videoFile] = prepareFiles(dataset, subjectid, sessionid);
 
-% RECOLA
-%folder con punti fiduciali e AU
-face_folder  = '/media/vcuculo/Data/Datasets/RECOLA/RECOLA-Video-features/';
-%folder con video
-%video_folder = '/media/vcuculo/Data/Datasets/RECOLA/RECOLA-Video-recordings/';
-video_folder = ['/media/vcuculo/Data/Datasets/Phuse/data/' subjectid];
 
 global h1 h3 hp hl hc vid fields activefields candide3 triangles pf auvs au2auv fs aubuttons;
 
@@ -59,23 +48,6 @@ close;
 
 figure('KeyReleaseFcn',@Key_Up, 'units','normalized','outerposition',[0 0 1 1]);
 
-%% Load AU
-% datafile con i punti fiduciali per frame per video
-% dataFile = strcat(face_folder, 'MAT/', subjectid, '.mat');
-if ~exist('sessionid','var')
-  dataFile = ['data/' subjectid '_au_openface.mat'];
-else
-  dataFile = ['data/' subjectid '_' sessionid '_au_openface.mat'];
-end
-
-% se non esiste il .mat lo crea dal .arff
-if ~exist(dataFile, 'file')
-    fprintf('Data file does not exists, creating...');
-    data = arffparser('read', strcat(face_folder, subjectid, '.arff'));
-    save(dataFile, 'data');
-    fprintf('DONE!\n');
-end
-
 % carica i dati
 pf = load(dataFile);
 datamin = inf;
@@ -93,21 +65,10 @@ for f = 1:length(fields)
             datamax = max(tmpdata{f});
         end
     end
-    % tmpdata{f} = pf.data.(fields{f}).values';
-    % remove all out of range values
-    % tmpdata{f}(abs(tmpdata{f})>5) = 0;
-    % tmpdata{f} = smooth(tmpdata{f});
 end
 
-%% Load Video
-if ~exist('sessionid','var')
-    videofile = [video_folder '/' subjectid '.avi'];
-    %videofile = [video_folder subjectid '.mp4'];    
-else
-    videofile = [video_folder '/' subjectid '_' sessionid '.avi'];
-    %videofile = [video_folder subjectid '.mp4'];
-end
-vid = VideoReader(videofile);
+
+vid = VideoReader(videoFile);
 
 fs = dataLen/vid.Duration;
 
@@ -305,3 +266,38 @@ for v = 1:length(candide3)
 end
 title(h3, score);
 hc.Vertices = candidet;
+
+function [dataFile, videoFile] = prepareFiles(dataset, subjectid, sessionid)
+switch dataset
+    case 'phuse'
+        subjectid = num2str(subjectid);
+        sessionid = num2str(sessionid);        
+        % folder with video        
+        video_folder = ['/media/vcuculo/Data/Datasets/Phuse/data/' subjectid];
+        % file containing AU
+        dataFile = ['data/' subjectid '_' sessionid '_au_openface.mat'];
+        % file containing video
+        videoFile = [video_folder '/' subjectid '_' sessionid '.avi'];
+        %videoFile = [video_folder subjectid '.mp4'];
+    
+    case 'recola'
+        subjectid = subjectid;        
+        % folder with original AU        
+        data_folder = '/media/vcuculo/Data/Datasets/RECOLA/RECOLA-Video-features/';        
+        % folder with video
+        video_folder = '/media/vcuculo/Data/Datasets/RECOLA/RECOLA-Video-recordings/';
+        % file containing AU
+        dataFile = ['data/' subjectid '_au_openface.mat'];
+        % file containing video
+        videoFile = [video_folder '/' subjectid '.avi'];
+        %videoFile = [video_folder subjectid '.mp4'];    
+    
+        % se non esiste il .mat lo crea dal .arff
+        if ~exist(dataFile, 'file')
+            dataFile = ['data/' subjectid '_au_original.mat'];
+            fprintf('Data file does not exists, creating...');
+            data = arffparser('read', strcat(data_folder, subjectid, '.arff'));
+            save(dataFile, 'data');
+            fprintf('DONE!\n');
+        end  
+end
