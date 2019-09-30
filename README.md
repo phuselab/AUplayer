@@ -5,6 +5,16 @@ The tool permits to plot [Action Units](https://www.cs.cmu.edu/~face/facs.htm) v
 ### Demo
 <img src="img/demo.gif" alt="Demo example" width="800px">
 
+### Reference
+If you use this code or data, please cite the paper: 
+```
+@inproceedings{boccignone2017amhuse,
+  title = {AMHUSE: A Multimodal dataset for HUmour SEnsing},
+  author = {Boccignone, Giuseppe and Conte, Donatello and Cuculo, Vittorio and Lanzarotti, Raffaella},
+  booktitle = {ICMI 19th ACM International Conference on Multimodal Interaction},
+  year = {2017}
+}
+```
 
 ### Credits
 **AU Player** is a [PHuSe Lab](http://phuselab.di.unimi.it/) project, from Università degli Studi di Milano.
